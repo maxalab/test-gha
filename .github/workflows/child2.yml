@@ -47,7 +47,7 @@ jobs:
         if: ${{ always() }}
         uses: actions/github-script@v6
         env:
-          STATUS_STATE: ${{ job.status != 'cancelled' && job.status || 'error' }}
+          STATUS_STATE: ${{ 'error' }}
         with:
           script: |
             const { owner, repo } = context.issue;
