@@ -5,29 +5,49 @@ on:
     types: [created]
 
 jobs:
-  info:
-    name: Echo event
+  trigger:
+    name: Trigger event
+    if: >
+      github.event.issue.pull_request &&
+      startsWith(github.event.comment.body, 'start') &&
+      (
+        contains(github.event.comment.body, 'child1') ||
+        contains(github.event.comment.body, 'child2')
+      )
     runs-on: ubuntu-latest
     steps:
       - name: Echo github event
         env:
           EVENT: '${{ toJson(github.event) }}'
         run: echo $EVENT
+
       - name: Echo github event
         run: echo ${{ github.ref }}
 
-  child1:
-    if: >
-      github.event.issue.pull_request &&
-      startsWith(github.event.comment.body, 'start') &&
-      contains(github.event.comment.body, 'child1')
-    uses: ./.github/workflows/child1.yml
-    secrets: inherit
+      - id: prData
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const { owner, repo, number } = context.issue;
+            const { data: pr } = await github.rest.pulls.get({ owner, repo, pull_number: number });
+            core.setOutput('ref', pr.head.ref)
 
-  child2:
-    if: >
-      github.event.issue.pull_request &&
-      startsWith(github.event.comment.body, 'start') &&
-      contains(github.event.comment.body, 'child2')
-    uses: ./.github/workflows/child2.yml
-    secrets: inherit
+      - name: child1
+        if: >
+          startsWith(github.event.comment.body, 'start') &&
+          contains(github.event.comment.body, 'child1')
+        uses: benc-uk/workflow-dispatch@v1.1
+        with:
+          workflow: Child 1
+          token: ${{ secrets.PRIVATE_TOKEN }}
+          ref: ${{ steps.prData.outputs.ref }}
+
+      - name: child2
+        if: >
+          startsWith(github.event.comment.body, 'start') &&
+          contains(github.event.comment.body, 'child2')
+        uses: benc-uk/workflow-dispatch@v1.1
+        with:
+          workflow: Child 2
+          token: ${{ secrets.PRIVATE_TOKEN }}
+          ref: ${{ steps.prData.outputs.ref }}

@@ -4,15 +4,58 @@ on:
   workflow_call:
 
   workflow_dispatch:
+    inputs:
+      ref:
+        description: Checkout ref
+        type: string
+        required: false
 
 jobs:
   child:
     name: Child 2
     runs-on: ubuntu-latest
+    env:
+      STATUS_TARGET_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      STATUS_CHECK_NAME: Child 2
+
     steps:
+      - name: Set status check - pending
+        uses: actions/github-script@v6
+        env:
+          STATUS_STATE: pending
+        with:
+          script: |
+            const { owner, repo } = context.issue;
+            await github.rest.repos.createCommitStatus({
+              owner,
+              repo,
+              sha: context.sha,
+              context: process.env.STATUS_CHECK_NAME,
+              state: process.env.STATUS_STATE,
+              target_url: process.env.STATUS_TARGET_URL
+            })
+
       - name: Echo github event
         env:
           EVENT: '${{ toJson(github.event) }}'
         run: echo $EVENT
-      - name: Echo github event
+
+      - name: Echo github ref
         run: echo ${{ github.ref }}
+
+      - name: Set status check - success / failure / error
+        if: ${{ always() }}
+        uses: actions/github-script@v6
+        env:
+          STATUS_STATE: ${{ job.status != 'cancelled' && job.status || 'error' }}
+        with:
+          script: |
+            const { owner, repo } = context.issue;
+            await github.rest.repos.createCommitStatus({
+              owner,
+              repo,
+              sha: context.sha,
+              context: process.env.STATUS_CHECK_NAME,
+              state: process.env.STATUS_STATE,
+              target_url: process.env.STATUS_TARGET_URL
+            })
