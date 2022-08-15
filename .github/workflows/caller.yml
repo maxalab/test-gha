@@ -1,0 +1,37 @@
+name: Caller
+
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  info:
+    name: Echo event
+    runs-on: ubuntu-latest
+    steps:
+      - name: Echo github event
+        env:
+          EVENT: '${{ toJson(github.event) }}'
+        run: echo $EVENT
+      - name: Echo github event
+        run: echo ${{ github.ref }}
+
+  child1:
+    name: Child 1 called
+    if: >
+      github.event.issue.pull_request &&
+      startsWith(github.event.comment.body, 'start') &&
+      contains(github.event.comment.body, 'child1')
+    runs-on: ubuntu-latest
+    uses: ./.github/workflows/child1.yml
+    secrets: inherit
+
+  child2:
+    name: Child 2 called
+    if: >
+      github.event.issue.pull_request &&
+      startsWith(github.event.comment.body, 'start') &&
+      contains(github.event.comment.body, 'child2')
+    runs-on: ubuntu-latest
+    uses: ./.github/workflows/child2.yml
+    secrets: inherit

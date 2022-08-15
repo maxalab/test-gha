@@ -1,0 +1,18 @@
+name: Child 1
+
+on:
+  workflow_call:
+
+  workflow_dispatch:
+
+jobs:
+  child:
+    name: Child 1
+    runs-on: ubuntu-latest
+    steps:
+      - name: Echo github event
+        env:
+          EVENT: '${{ toJson(github.event) }}'
+        run: echo $EVENT
+      - name: Echo github event
+        run: echo ${{ github.ref }}
