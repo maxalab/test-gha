@@ -38,7 +38,7 @@ jobs:
           contains(github.event.comment.body, 'child1')
         uses: benc-uk/workflow-dispatch@v1.1
         with:
-          workflow: "Check: Child 1"
+          workflow: "PR Child 1"
           token: ${{ secrets.PRIVATE_TOKEN }}
           ref: ${{ steps.prData.outputs.ref }}
 
@@ -48,7 +48,7 @@ jobs:
           contains(github.event.comment.body, 'child2')
         uses: benc-uk/workflow-dispatch@v1.1
         with:
-          workflow: "Check: Child 2"
+          workflow: "PR Child 2"
           token: ${{ secrets.PRIVATE_TOKEN }}
           ref: ${{ steps.prData.outputs.ref }}
 

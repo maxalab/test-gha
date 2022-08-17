@@ -1,4 +1,4 @@
-name: Check: Child 2
+name: PR Child 2
 
 on:
   workflow_call:
@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       STATUS_TARGET_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
-      STATUS_CHECK_NAME: Check: Child 2
+      STATUS_CHECK_NAME: PR Child 2
 
     steps:
       - name: Set status check - pending
